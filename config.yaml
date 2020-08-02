@@ -1,0 +1,14 @@
+registries:
+ - platform: dockerhub
+   imagename: alpine
+   imageurl: alpine
+ - platform: quay
+   imagename: alpine
+   imageurl: quay.io/jitesoft/alpine
+ - platform: gitlab
+   imagename: alpine
+   imageurl: registry.gitlab.com/jitesoft/dockerfiles/alpine
+ 
+iterations: 10
+
+storageurl: 
