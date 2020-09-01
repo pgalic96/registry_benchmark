@@ -18,7 +18,7 @@ type ImgGen struct {
 
 // Config is the config for image generation
 type Config struct {
-	ImageGeneration ImgGen
+	ImageGeneration ImgGen `yaml:"image-generation,omitempty"`
 }
 
 func loadConfig() (*Config, error) {
