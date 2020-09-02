@@ -5,6 +5,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"strconv"
 
 	"gopkg.in/yaml.v3"
 )
@@ -37,23 +38,26 @@ func loadConfig() (*Config, error) {
 // Generate a docker image out of yaml config file
 func Generate() {
 	log.Printf("Loading config file")
-	config, err := loadConfig()
+	config, _ := loadConfig()
 	layerSize := int64((config.ImageGeneration.ImgSizeMb / config.ImageGeneration.LayerNumber) * 1024 * 1024)
-	fd, err := os.Create("imggen")
-	if err != nil {
-		log.Fatal("Failed to create file")
-	}
-	//for i := 0; i < config.ImageGeneration.LayerNumber; i++ {
-	if config.ImageGeneration.GenerateRandom {
-		_, err = fd.Seek(layerSize-9, 0)
-		randbytes := make([]byte, 8)
-		rand.Read(randbytes)
-		_, err = fd.Write(randbytes)
-		_, err = fd.Write([]byte{0})
-		err = fd.Close()
+
+	for i := 0; i < config.ImageGeneration.LayerNumber; i++ {
+		fd, err := os.Create("docker-layer-" + strconv.Itoa(i))
 		if err != nil {
-			log.Fatal("Failed to close file")
+			log.Fatalf("Failed to create file: %v", err)
 		}
+		if config.ImageGeneration.GenerateRandom {
+			_, err = fd.Seek(layerSize-9, 0)
+			randbytes := make([]byte, 8)
+			rand.Read(randbytes)
+			_, err = fd.Write(randbytes)
+			_, err = fd.Write([]byte{0})
+			err = fd.Close()
+			if err != nil {
+				log.Fatal("Failed to close file")
+			}
+		}
+
+		log.Printf("Docker layer generated")
 	}
-	//}
 }

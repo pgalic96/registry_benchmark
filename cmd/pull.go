@@ -2,11 +2,13 @@ package cmd
 
 import (
 	"context"
+	"encoding/csv"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/docker/docker/api/types"
@@ -16,18 +18,21 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// WriteToCSV is a bool flag for writing benchmark results locally to CSV
+var WriteToCSV bool
+
 // Registry is the struct for single registry config
 type Registry struct {
 	Platform  string
-	Imagename string
-	Imageurl  string
+	ImageName string `yaml:"image-name,omitempty"`
+	ImageURL  string `yaml:"image-url,omitempty"`
 }
 
 // Config is the configuration for the benchmark
 type Config struct {
 	Registries []Registry
 	Iterations int
-	Storageurl string
+	StorageURL string `yaml:"storage-url,omitempty"`
 }
 
 // LoadConfig is the function for loading configuration from yaml file
@@ -45,11 +50,12 @@ func LoadConfig() (*Config, error) {
 }
 
 func init() {
+	pullCmd.Flags().BoolVarP(&WriteToCSV, "csv", "c", false, "write to local csv file")
 	rootCmd.AddCommand(pullCmd)
 }
 
 var pullCmd = &cobra.Command{
-	Use:   "pull",
+	Use:   "pullbench",
 	Short: "Benchmark docker pull",
 	Long:  `pull executes a docker pull and measures time it takes for it.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -58,20 +64,32 @@ var pullCmd = &cobra.Command{
 
 		log.Printf("Configuring influx client")
 		c, err := influxclient.NewHTTPClient(influxclient.HTTPConfig{
-			Addr: config.Storageurl,
+			Addr: config.StorageURL,
 		})
 		if err != nil {
 			fmt.Println("Error creating InfluxDB Client: ", err.Error())
 		}
 		defer c.Close()
 		log.Printf("Client configured")
-		for _, registry := range config.Registries {
+		var benchmarkData = make([][]string, len(config.Registries)*config.Iterations+1)
+		dt := time.Now()
+		csvFile, err := os.Create("pull-" + dt.String() + ".csv")
+		if err != nil {
+			log.Fatalf("failed creating file: %s", err)
+		}
+		var csvwriter = csv.NewWriter(csvFile)
+		defer csvFile.Close()
+		if WriteToCSV == true {
+			benchmarkData[0] = []string{"iteration", "platform", "image", "latency", "time"}
+		}
+
+		for x, registry := range config.Registries {
 			bp, _ := influxclient.NewBatchPoints(influxclient.BatchPointsConfig{
 				Database:  "docker_benchmark",
 				Precision: "s",
 			})
 
-			tags := map[string]string{"platform": registry.Platform, "image": registry.Imagename}
+			tags := map[string]string{"platform": registry.Platform, "image": registry.ImageName}
 
 			for i := 0; i < config.Iterations; i++ {
 
@@ -80,13 +98,13 @@ var pullCmd = &cobra.Command{
 				if err != nil {
 					panic(err)
 				}
-				_, _ = cli.ImageRemove(ctx, registry.Imageurl, types.ImageRemoveOptions{})
+				_, _ = cli.ImageRemove(ctx, registry.ImageURL, types.ImageRemoveOptions{})
 				if err != nil {
 					panic(err)
 				}
 				start := time.Now()
 
-				reader, err := cli.ImagePull(ctx, registry.Imageurl, types.ImagePullOptions{})
+				reader, err := cli.ImagePull(ctx, registry.ImageURL, types.ImagePullOptions{})
 				if err != nil {
 					panic(err)
 				}
@@ -97,6 +115,9 @@ var pullCmd = &cobra.Command{
 				fields := map[string]interface{}{
 					"docker_pull_time": elapsed.Seconds(),
 					"iteration_number": i,
+				}
+				if WriteToCSV == true {
+					benchmarkData[x*config.Iterations+1+i] = []string{strconv.Itoa(i), registry.Platform, registry.ImageName, elapsed.String(), time.Now().Format("2006-01-02T15:04:05.999999-07:00")}
 				}
 
 				pt, err := influxclient.NewPoint("registry_pull", tags, fields, time.Now())
@@ -113,4 +134,10 @@ var pullCmd = &cobra.Command{
 				panic(err)
 			}
 		}
+		if WriteToCSV == true {
+			for _, row := range benchmarkData {
+				csvwriter.Write(row)
+			}
+		}
+		csvwriter.Flush()
 	}}
