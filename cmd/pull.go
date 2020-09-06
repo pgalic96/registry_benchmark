@@ -16,6 +16,8 @@ import (
 	influxclient "github.com/influxdata/influxdb1-client/v2"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
+
+	"registry_benchmark/imggen"
 )
 
 // WriteToCSV is a bool flag for writing benchmark results locally to CSV
@@ -30,13 +32,14 @@ type Registry struct {
 
 // Config is the configuration for the benchmark
 type Config struct {
-	Registries []Registry
-	Iterations int
-	StorageURL string `yaml:"storage-url,omitempty"`
+	Registries      []Registry
+	ImageGeneration imggen.ImgGen `yaml:"image-generation,omitempty"`
+	Iterations      int
+	StorageURL      string `yaml:"storage-url,omitempty"`
 }
 
 // LoadConfig is the function for loading configuration from yaml file
-func LoadConfig() (*Config, error) {
+func loadConfig() (*Config, error) {
 	c := Config{}
 	yamlFile, err := ioutil.ReadFile("config.yaml")
 	if err != nil {
@@ -60,14 +63,14 @@ var pullCmd = &cobra.Command{
 	Long:  `pull executes a docker pull and measures time it takes for it.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Printf("Loading config file")
-		config, err := LoadConfig()
+		config, err := loadConfig()
 
 		log.Printf("Configuring influx client")
 		c, err := influxclient.NewHTTPClient(influxclient.HTTPConfig{
 			Addr: config.StorageURL,
 		})
 		if err != nil {
-			fmt.Println("Error creating InfluxDB Client: ", err.Error())
+			log.Fatalf("Error creating InfluxDB Client: ", err.Error())
 		}
 		defer c.Close()
 		log.Printf("Client configured")
