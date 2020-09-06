@@ -25,15 +25,19 @@ var WriteToCSV bool
 
 // Registry is the struct for single registry config
 type Registry struct {
-	Platform  string
-	ImageName string `yaml:"image-name,omitempty"`
-	ImageURL  string `yaml:"image-url,omitempty"`
+	Platform   string
+	ImageURL   string `yaml:"image-url,omitempty"`
+	URL        string `yaml:"registry-url,omitempty"`
+	Username   string
+	Password   string
+	Repository string
 }
 
 // Config is the configuration for the benchmark
 type Config struct {
 	Registries      []Registry
 	ImageGeneration imggen.ImgGen `yaml:"image-generation,omitempty"`
+	ImageName       string        `yaml:"image-name,omitempty"`
 	Iterations      int
 	StorageURL      string `yaml:"storage-url,omitempty"`
 }
@@ -92,7 +96,7 @@ var pullCmd = &cobra.Command{
 				Precision: "s",
 			})
 
-			tags := map[string]string{"platform": registry.Platform, "image": registry.ImageName}
+			tags := map[string]string{"platform": registry.Platform, "image": config.ImageName}
 
 			for i := 0; i < config.Iterations; i++ {
 
@@ -120,7 +124,7 @@ var pullCmd = &cobra.Command{
 					"iteration_number": i,
 				}
 				if WriteToCSV == true {
-					benchmarkData[x*config.Iterations+1+i] = []string{strconv.Itoa(i), registry.Platform, registry.ImageName, elapsed.String(), time.Now().Format("2006-01-02T15:04:05.999999-07:00")}
+					benchmarkData[x*config.Iterations+1+i] = []string{strconv.Itoa(i), registry.Platform, config.ImageName, elapsed.String(), time.Now().Format("2006-01-02T15:04:05.999999-07:00")}
 				}
 
 				pt, err := influxclient.NewPoint("registry_pull", tags, fields, time.Now())
