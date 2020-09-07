@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var writeToCSV bool
+
 var rootCmd = &cobra.Command{
 	Use:   "benchmarkd",
 	Short: "Docker registry benchmark",
@@ -19,4 +21,8 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+}
+
+func init() {
+	rootCmd.PersistentFlags().BoolVarP(&writeToCSV, "csv", "c", false, "write to local csv file")
 }

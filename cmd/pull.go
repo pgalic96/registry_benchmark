@@ -20,9 +20,6 @@ import (
 	"registry_benchmark/imggen"
 )
 
-// WriteToCSV is a bool flag for writing benchmark results locally to CSV
-var WriteToCSV bool
-
 // Registry is the struct for single registry config
 type Registry struct {
 	Platform   string
@@ -57,7 +54,6 @@ func loadConfig() (*Config, error) {
 }
 
 func init() {
-	pullCmd.Flags().BoolVarP(&WriteToCSV, "csv", "c", false, "write to local csv file")
 	rootCmd.AddCommand(pullCmd)
 }
 
@@ -86,7 +82,7 @@ var pullCmd = &cobra.Command{
 		}
 		var csvwriter = csv.NewWriter(csvFile)
 		defer csvFile.Close()
-		if WriteToCSV == true {
+		if writeToCSV == true {
 			benchmarkData[0] = []string{"iteration", "platform", "image", "latency", "time"}
 		}
 
@@ -123,7 +119,7 @@ var pullCmd = &cobra.Command{
 					"docker_pull_time": elapsed.Seconds(),
 					"iteration_number": i,
 				}
-				if WriteToCSV == true {
+				if writeToCSV == true {
 					benchmarkData[x*config.Iterations+1+i] = []string{strconv.Itoa(i), registry.Platform, config.ImageName, elapsed.String(), time.Now().Format("2006-01-02T15:04:05.999999-07:00")}
 				}
 
@@ -141,7 +137,7 @@ var pullCmd = &cobra.Command{
 				panic(err)
 			}
 		}
-		if WriteToCSV == true {
+		if writeToCSV == true {
 			for _, row := range benchmarkData {
 				csvwriter.Write(row)
 			}

@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"bytes"
+	"encoding/csv"
 	"encoding/hex"
+	"os"
 	"strconv"
 
 	// Blind
@@ -29,6 +31,7 @@ func randomHex(n int) (string, error) {
 }
 
 func init() {
+	pullCmd.Flags().BoolVarP(&writeToCSV, "csv", "c", false, "write to local csv file")
 	rootCmd.AddCommand(pushCmd)
 }
 
@@ -47,15 +50,28 @@ var pushCmd = &cobra.Command{
 			log.Fatalf("Error creating InfluxDB Client: ", err.Error())
 		}
 		defer c.Close()
+
+		var benchmarkData = make([][]string, len(config.Registries)*config.ImageGeneration.LayerNumber+1)
+		dt := time.Now()
+		csvFile, err := os.Create("push-" + strconv.Itoa(config.ImageGeneration.ImgSizeMb) + "-" + strconv.Itoa(config.ImageGeneration.LayerNumber) + "-" + dt.String() + ".csv")
+		if err != nil {
+			log.Fatalf("failed creating file: %s", err)
+		}
+		var csvwriter = csv.NewWriter(csvFile)
+		defer csvFile.Close()
+		if writeToCSV == true {
+			benchmarkData[0] = []string{"platform", "layer", "latency"}
+		}
+
 		log.Printf("Client configured")
 		imggen.Generate()
-		for _, containerReg := range config.Registries {
+		for x, containerReg := range config.Registries {
 			hub, err := registry.New(containerReg.URL, containerReg.Username, containerReg.Password)
 			if err != nil {
 				log.Fatalf("Error initializing a registry client: %v", err)
 			}
 			for i := 0; i < config.ImageGeneration.LayerNumber; i++ {
-				hexval, _ := randomHex(10)
+				hexval, _ := randomHex(32)
 				digest := digest.NewDigestFromHex(
 					"sha256",
 					hexval,
@@ -72,7 +88,16 @@ var pushCmd = &cobra.Command{
 					hub.UploadBlob(containerReg.Repository, digest, bytes.NewReader(file), nil)
 					elapsed := time.Since(start)
 					log.Printf("Blob uploaded successfully: %v", elapsed)
+					if writeToCSV == true {
+						benchmarkData[1+i+x*config.ImageGeneration.LayerNumber] = []string{containerReg.Platform, strconv.Itoa(i), elapsed.String()}
+					}
 				}
 			}
 		}
+		if writeToCSV == true {
+			for _, row := range benchmarkData {
+				csvwriter.Write(row)
+			}
+		}
+		csvwriter.Flush()
 	}}
