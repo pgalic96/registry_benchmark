@@ -20,20 +20,21 @@ import (
 	"registry_benchmark/imggen"
 )
 
-// WriteToCSV is a bool flag for writing benchmark results locally to CSV
-var WriteToCSV bool
-
 // Registry is the struct for single registry config
 type Registry struct {
-	Platform  string
-	ImageName string `yaml:"image-name,omitempty"`
-	ImageURL  string `yaml:"image-url,omitempty"`
+	Platform   string
+	ImageURL   string `yaml:"image-url,omitempty"`
+	URL        string `yaml:"registry-url,omitempty"`
+	Username   string
+	Password   string
+	Repository string
 }
 
 // Config is the configuration for the benchmark
 type Config struct {
 	Registries      []Registry
 	ImageGeneration imggen.ImgGen `yaml:"image-generation,omitempty"`
+	ImageName       string        `yaml:"image-name,omitempty"`
 	Iterations      int
 	StorageURL      string `yaml:"storage-url,omitempty"`
 }
@@ -53,7 +54,6 @@ func loadConfig() (*Config, error) {
 }
 
 func init() {
-	pullCmd.Flags().BoolVarP(&WriteToCSV, "csv", "c", false, "write to local csv file")
 	rootCmd.AddCommand(pullCmd)
 }
 
@@ -82,7 +82,7 @@ var pullCmd = &cobra.Command{
 		}
 		var csvwriter = csv.NewWriter(csvFile)
 		defer csvFile.Close()
-		if WriteToCSV == true {
+		if writeToCSV == true {
 			benchmarkData[0] = []string{"iteration", "platform", "image", "latency", "time"}
 		}
 
@@ -92,7 +92,7 @@ var pullCmd = &cobra.Command{
 				Precision: "s",
 			})
 
-			tags := map[string]string{"platform": registry.Platform, "image": registry.ImageName}
+			tags := map[string]string{"platform": registry.Platform, "image": config.ImageName}
 
 			for i := 0; i < config.Iterations; i++ {
 
@@ -119,8 +119,8 @@ var pullCmd = &cobra.Command{
 					"docker_pull_time": elapsed.Seconds(),
 					"iteration_number": i,
 				}
-				if WriteToCSV == true {
-					benchmarkData[x*config.Iterations+1+i] = []string{strconv.Itoa(i), registry.Platform, registry.ImageName, elapsed.String(), time.Now().Format("2006-01-02T15:04:05.999999-07:00")}
+				if writeToCSV == true {
+					benchmarkData[x*config.Iterations+1+i] = []string{strconv.Itoa(i), registry.Platform, config.ImageName, elapsed.String(), time.Now().Format("2006-01-02T15:04:05.999999-07:00")}
 				}
 
 				pt, err := influxclient.NewPoint("registry_pull", tags, fields, time.Now())
@@ -137,7 +137,7 @@ var pullCmd = &cobra.Command{
 				panic(err)
 			}
 		}
-		if WriteToCSV == true {
+		if writeToCSV == true {
 			for _, row := range benchmarkData {
 				csvwriter.Write(row)
 			}

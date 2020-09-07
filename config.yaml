@@ -1,14 +1,19 @@
 registries:
- - platform: dockerhub
-   imagename: alpine
-   imageurl: alpine
- - platform: quay
-   imagename: alpine
-   imageurl: quay.io/jitesoft/alpine
- - platform: gitlab
-   imagename: alpine
-   imageurl: registry.gitlab.com/jitesoft/dockerfiles/alpine
- 
-iterations: 10
+ - platform: 
+   image-url: 
+   registry-url: 
+   username: 
+   password: 
+   repository: 
 
-storageurl: 
+image-name: 
+ 
+iterations: 
+
+storage-url: 
+
+image-generation:
+  img-size-mb: 
+  layer-number: 
+  generate-random: 
+  
