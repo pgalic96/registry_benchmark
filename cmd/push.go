@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"os"
 	"strconv"
+	"strings"
 
 	// Blind
 	"crypto/rand"
@@ -19,6 +20,7 @@ import (
 	"github.com/opencontainers/go-digest"
 	"github.com/spf13/cobra"
 
+	"registry_benchmark/auth"
 	"registry_benchmark/imggen"
 )
 
@@ -66,7 +68,18 @@ var pushCmd = &cobra.Command{
 		log.Printf("Client configured")
 		imggen.Generate()
 		for x, containerReg := range config.Registries {
-			hub, err := registry.New(containerReg.URL, containerReg.Username, containerReg.Password)
+			var password string
+			if containerReg.Platform == "ecr" {
+				token, err := auth.GetECRAuthorizationToken(containerReg.AccountID, containerReg.Region)
+				if err != nil {
+					log.Fatalf("Error obtaining aws authorization token: %v", err)
+				}
+				password = strings.TrimPrefix(token, "AWS:")
+				log.Println(password)
+			} else {
+				password = containerReg.Password
+			}
+			hub, err := registry.New(containerReg.URL, containerReg.Username, password)
 			if err != nil {
 				log.Fatalf("Error initializing a registry client: %v", err)
 			}
