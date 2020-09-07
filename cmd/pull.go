@@ -28,6 +28,8 @@ type Registry struct {
 	Username   string
 	Password   string
 	Repository string
+	AccountID  string `yaml:"account-id,omitempty"`
+	Region     string
 }
 
 // Config is the configuration for the benchmark
