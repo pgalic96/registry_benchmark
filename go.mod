@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/Microsoft/go-winio v0.4.14 // indirect
+	github.com/aws/aws-sdk-go v1.34.18
 	github.com/containerd/containerd v1.4.0 // indirect
 	github.com/docker/docker v17.12.0-ce-rc1.0.20200901185902-ae0ef82b9035+incompatible
 	github.com/docker/go-connections v0.4.0 // indirect

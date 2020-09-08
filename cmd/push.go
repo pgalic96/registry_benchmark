@@ -69,16 +69,16 @@ var pushCmd = &cobra.Command{
 		imggen.Generate()
 		for x, containerReg := range config.Registries {
 			var password string
-			if containerReg.Platform == "ecr" {
+			if containerReg.Platform == "ecr" && containerReg.Password == "" {
 				token, err := auth.GetECRAuthorizationToken(containerReg.AccountID, containerReg.Region)
 				if err != nil {
 					log.Fatalf("Error obtaining aws authorization token: %v", err)
 				}
 				password = strings.TrimPrefix(token, "AWS:")
-				log.Println(password)
 			} else {
 				password = containerReg.Password
 			}
+
 			hub, err := registry.New(containerReg.URL, containerReg.Username, password)
 			if err != nil {
 				log.Fatalf("Error initializing a registry client: %v", err)
