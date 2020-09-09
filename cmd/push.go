@@ -16,8 +16,8 @@ import (
 	"time"
 
 	influxclient "github.com/influxdata/influxdb1-client/v2"
-	"github.com/nokia/docker-registry-client/registry"
 	"github.com/opencontainers/go-digest"
+	"github.com/pgalic96/docker-registry-client/registry"
 	"github.com/spf13/cobra"
 
 	"registry_benchmark/auth"
