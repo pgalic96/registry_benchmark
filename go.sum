@@ -188,6 +188,14 @@ github.com/pgalic96/docker-registry-client v0.0.0-20200909093729-5e3ece9c4d74 h1
 github.com/pgalic96/docker-registry-client v0.0.0-20200909093729-5e3ece9c4d74/go.mod h1:hkvMPhqotDM7cDUZDKH5n1VfyvEMb9hkw6hsZIYGmJ0=
 github.com/pgalic96/docker-registry-client v0.0.0-20200909094206-88affa23df99 h1:qCvDK/8dh1EsrTKKKHW2e0vJtcYUf7oOss9w+KhTpz0=
 github.com/pgalic96/docker-registry-client v0.0.0-20200909094206-88affa23df99/go.mod h1:hkvMPhqotDM7cDUZDKH5n1VfyvEMb9hkw6hsZIYGmJ0=
+github.com/pgalic96/docker-registry-client v0.0.0-20200909111242-95702d0790d9 h1:R0oODBWS1lYANoaiMhu0dNqBYM0zTBvwx6rHPYi6P6o=
+github.com/pgalic96/docker-registry-client v0.0.0-20200909111242-95702d0790d9/go.mod h1:hkvMPhqotDM7cDUZDKH5n1VfyvEMb9hkw6hsZIYGmJ0=
+github.com/pgalic96/docker-registry-client v0.0.0-20200909112818-cc6d3be5b538 h1:NSQiEpiXD9/kvNdSuFAUxdHUDPtPVF5HA90YfsYsrFc=
+github.com/pgalic96/docker-registry-client v0.0.0-20200909112818-cc6d3be5b538/go.mod h1:hkvMPhqotDM7cDUZDKH5n1VfyvEMb9hkw6hsZIYGmJ0=
+github.com/pgalic96/docker-registry-client v0.0.0-20200909113021-b66062e775f2 h1:B4NB0ve7UYRP+KpIuaRpzxk2q20Z37erHuAYG7vHzbc=
+github.com/pgalic96/docker-registry-client v0.0.0-20200909113021-b66062e775f2/go.mod h1:hkvMPhqotDM7cDUZDKH5n1VfyvEMb9hkw6hsZIYGmJ0=
+github.com/pgalic96/docker-registry-client v0.0.0-20200909113948-2de47a23470d h1:sPwa6g/os1hU+sZ48/+/uhHlaKMdnoQQYD4YM0D7bAs=
+github.com/pgalic96/docker-registry-client v0.0.0-20200909113948-2de47a23470d/go.mod h1:hkvMPhqotDM7cDUZDKH5n1VfyvEMb9hkw6hsZIYGmJ0=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
