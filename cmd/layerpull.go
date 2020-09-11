@@ -5,18 +5,17 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
-	"strings"
 
 	// Blind
 	_ "crypto/sha256"
 	"log"
 	"time"
 
-	"github.com/nokia/docker-registry-client/registry"
 	"github.com/opencontainers/go-digest"
 	"github.com/spf13/cobra"
 
 	"registry_benchmark/auth"
+	"registry_benchmark/config"
 )
 
 func init() {
@@ -28,24 +27,13 @@ var layerPullCmd = &cobra.Command{
 	Short: "Benchmark docker pull with http",
 	Long:  `layerpull measures latency when pulling previously pushed generated image layers`,
 	Run: func(cmd *cobra.Command, args []string) {
-		config, _ := loadConfig()
+		config, _ := config.LoadConfig()
 
 		var benchmarkData = make([][]string, len(config.Registries)*config.ImageGeneration.LayerNumber+1)
 		benchmarkData[0] = []string{"platform", "layer", "latency"}
 
 		for x, containerReg := range config.Registries {
-			var password string
-			if containerReg.Platform == "ecr" && containerReg.Password == "" {
-				token, err := auth.GetECRAuthorizationToken(containerReg.AccountID, containerReg.Region)
-				if err != nil {
-					log.Fatalf("Error obtaining aws authorization token: %v", err)
-				}
-				password = strings.TrimPrefix(token, "AWS:")
-			} else {
-				password = containerReg.Password
-			}
-
-			hub, err := registry.New(containerReg.URL, containerReg.Username, password)
+			hub, err := auth.AuthenticateRegistry(containerReg)
 			if err != nil {
 				log.Fatalf("Error initializing a registry client: %v", err)
 			}

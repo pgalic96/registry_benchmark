@@ -6,16 +6,15 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
-	"strings"
 
 	"log"
 	"time"
 
 	"github.com/opencontainers/go-digest"
-	"github.com/pgalic96/docker-registry-client/registry"
 	"github.com/spf13/cobra"
 
 	"registry_benchmark/auth"
+	registryconfig "registry_benchmark/config"
 	"registry_benchmark/imggen"
 )
 
@@ -28,25 +27,15 @@ var pushCmd = &cobra.Command{
 	Short: "Benchmark docker push with http",
 	Long:  `push generates images and measures push latency`,
 	Run: func(cmd *cobra.Command, args []string) {
-		config, _ := loadConfig()
+		config, _ := registryconfig.LoadConfig()
 
 		var benchmarkData = make([][]string, len(config.Registries)*config.ImageGeneration.LayerNumber+1)
 		benchmarkData[0] = []string{"platform", "layer", "latency"}
 
 		filepath := imggen.Generate()
 		for x, containerReg := range config.Registries {
-			var password string
-			if containerReg.Platform == "ecr" && containerReg.Password == "" {
-				token, err := auth.GetECRAuthorizationToken(containerReg.AccountID, containerReg.Region)
-				if err != nil {
-					log.Fatalf("Error obtaining aws authorization token: %v", err)
-				}
-				password = strings.TrimPrefix(token, "AWS:")
-			} else {
-				password = containerReg.Password
-			}
 
-			hub, err := registry.New(containerReg.URL, containerReg.Username, password)
+			hub, err := auth.AuthenticateRegistry(containerReg)
 			if err != nil {
 				log.Fatalf("Error initializing a registry client: %v", err)
 			}
