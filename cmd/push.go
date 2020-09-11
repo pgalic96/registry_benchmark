@@ -27,7 +27,7 @@ var pushCmd = &cobra.Command{
 	Short: "Benchmark docker push with http",
 	Long:  `push generates images and measures push latency`,
 	Run: func(cmd *cobra.Command, args []string) {
-		config, _ := registryconfig.LoadConfig()
+		config, _ := registryconfig.LoadConfig(yamlFilename)
 
 		var benchmarkData = make([][]string, len(config.Registries)*config.ImageGeneration.LayerNumber+1)
 		benchmarkData[0] = []string{"platform", "layer", "latency"}
@@ -35,7 +35,7 @@ var pushCmd = &cobra.Command{
 		filepath := imggen.Generate()
 		for x, containerReg := range config.Registries {
 
-			hub, err := auth.AuthenticateRegistry(containerReg)
+			hub, err := auth.AuthenticateRegistry(containerReg, yamlFilename)
 			if err != nil {
 				log.Fatalf("Error initializing a registry client: %v", err)
 			}

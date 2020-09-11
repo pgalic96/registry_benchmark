@@ -31,9 +31,9 @@ type Config struct {
 }
 
 // LoadConfig is the function for loading configuration from yaml file
-func LoadConfig() (*Config, error) {
+func LoadConfig(filename string) (*Config, error) {
 	c := Config{}
-	yamlFile, err := ioutil.ReadFile("config.yaml")
+	yamlFile, err := ioutil.ReadFile(filename)
 	if err != nil {
 		log.Printf("yamlFile.Get err   #%v ", err)
 	}
