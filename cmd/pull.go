@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"registry_benchmark/config"
 	"strconv"
 	"time"
 
@@ -26,7 +27,7 @@ var pullCmd = &cobra.Command{
 	Long:  `pull executes a docker pull and measures time it takes for it.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Printf("Loading config file")
-		config, err := loadConfig()
+		config, err := config.LoadConfig()
 
 		log.Printf("Configuring influx client")
 		c, err := influxclient.NewHTTPClient(influxclient.HTTPConfig{
