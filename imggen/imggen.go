@@ -1,13 +1,12 @@
 package imggen
 
 import (
+	"crypto/rand"
 	"encoding/hex"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"os"
 	"path/filepath"
-	"strconv"
 
 	"gopkg.in/yaml.v3"
 )
@@ -21,7 +20,8 @@ type ImgGen struct {
 
 // Config is the config for image generation
 type Config struct {
-	ImageGeneration ImgGen `yaml:"image-generation,omitempty"`
+	ImageGeneration  ImgGen `yaml:"image-generation,omitempty"`
+	PullSourceFolder string `yaml:"pull-source-folder,omitempty"`
 }
 
 func create(p string) (*os.File, error) {
@@ -57,8 +57,11 @@ func Generate() string {
 	log.Printf("Loading config file")
 	config, _ := loadConfig()
 	layerSize := int64((config.ImageGeneration.ImgSizeMb / config.ImageGeneration.LayerNumber) * 1024 * 1024)
-	randhex, _ := randomHex(3)
-	filepath := strconv.Itoa(config.ImageGeneration.ImgSizeMb) + "-" + strconv.Itoa(config.ImageGeneration.LayerNumber) + "-" + randhex + "/"
+	filepath := config.PullSourceFolder + "/"
+	dir, _ := ioutil.ReadDir(filepath)
+	for _, d := range dir {
+		os.RemoveAll(filepath + d.Name())
+	}
 	for i := 0; i < config.ImageGeneration.LayerNumber; i++ {
 		hexval, _ := randomHex(32)
 		fd, err := create(filepath + hexval)
