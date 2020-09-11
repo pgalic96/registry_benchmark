@@ -1,4 +1,4 @@
-package cmd
+package config
 
 import (
 	"io/ioutil"
@@ -31,7 +31,7 @@ type Config struct {
 }
 
 // LoadConfig is the function for loading configuration from yaml file
-func loadConfig() (*Config, error) {
+func LoadConfig() (*Config, error) {
 	c := Config{}
 	yamlFile, err := ioutil.ReadFile("config.yaml")
 	if err != nil {
