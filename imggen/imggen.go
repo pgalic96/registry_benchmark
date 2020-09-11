@@ -39,9 +39,9 @@ func randomHex(n int) (string, error) {
 	return hex.EncodeToString(bytes), nil
 }
 
-func loadConfig() (*Config, error) {
+func loadConfig(yamlFilename string) (*Config, error) {
 	c := Config{}
-	yamlFile, err := ioutil.ReadFile("config.yaml")
+	yamlFile, err := ioutil.ReadFile(yamlFilename)
 	if err != nil {
 		log.Printf("yamlFile.Get err   #%v ", err)
 	}
@@ -53,9 +53,9 @@ func loadConfig() (*Config, error) {
 }
 
 // Generate a docker image out of yaml config file
-func Generate() string {
+func Generate(yamlFilename string) string {
 	log.Printf("Loading config file")
-	config, _ := loadConfig()
+	config, _ := loadConfig(yamlFilename)
 	layerSize := int64((config.ImageGeneration.ImgSizeMb / config.ImageGeneration.LayerNumber) * 1024 * 1024)
 	filepath := config.PullSourceFolder + "/"
 	dir, _ := ioutil.ReadDir(filepath)

@@ -8,6 +8,7 @@ import (
 )
 
 var writeToCSV bool
+var yamlFilename string
 
 var rootCmd = &cobra.Command{
 	Use:   "benchmarkd",
@@ -24,5 +25,6 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.PersistentFlags().StringVarP(&yamlFilename, "yaml", "y", "config.yaml", "benchmark config file name")
 	rootCmd.PersistentFlags().BoolVarP(&writeToCSV, "csv", "c", false, "write to local csv file")
 }

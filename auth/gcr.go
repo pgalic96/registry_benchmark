@@ -12,9 +12,9 @@ type Config struct {
 	GoogleRegistryKey string `yaml:"gcloud-key,omitempty"`
 }
 
-func loadConfig() (*Config, error) {
+func loadConfig(yamlFilename string) (*Config, error) {
 	c := Config{}
-	yamlFile, err := ioutil.ReadFile("config.yaml")
+	yamlFile, err := ioutil.ReadFile(yamlFilename)
 	if err != nil {
 		log.Printf("yamlFile.Get err   #%v ", err)
 	}
@@ -26,8 +26,8 @@ func loadConfig() (*Config, error) {
 }
 
 // GetGCRAuthorizationKey obtains key for authenticating with Google Cloud Registry
-func GetGCRAuthorizationKey() (string, error) {
-	config, _ := loadConfig()
+func GetGCRAuthorizationKey(filename string) (string, error) {
+	config, _ := loadConfig(filename)
 	log.Println(config.GoogleRegistryKey)
 	content, err := ioutil.ReadFile(config.GoogleRegistryKey)
 	if err != nil {
