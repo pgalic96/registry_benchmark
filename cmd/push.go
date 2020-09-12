@@ -32,7 +32,7 @@ var pushCmd = &cobra.Command{
 		var benchmarkData = make([][]string, len(config.Registries)*config.ImageGeneration.LayerNumber+1)
 		benchmarkData[0] = []string{"platform", "layer", "latency"}
 
-		filepath := imggen.Generate()
+		filepath := imggen.Generate(yamlFilename)
 		for x, containerReg := range config.Registries {
 
 			hub, err := auth.AuthenticateRegistry(containerReg, yamlFilename)
