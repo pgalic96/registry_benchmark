@@ -36,7 +36,8 @@ var layerPullCmd = &cobra.Command{
 		for x, containerReg := range config.Registries {
 			hub, err := auth.AuthenticateRegistry(containerReg, yamlFilename)
 			if err != nil {
-				log.Fatalf("Error initializing a registry client: %v", err)
+				log.Printf("Error initializing a registry client: %v", err)
+				continue
 			}
 
 			items, _ := ioutil.ReadDir(config.PullSourceFolder)
@@ -46,23 +47,27 @@ var layerPullCmd = &cobra.Command{
 					item.Name(),
 				)
 				log.Printf("Checking for blob in repository")
+				exists, err := hub.HasBlob(containerReg.Repository, digest)
 				if err != nil {
-					log.Fatalf("Error while checking if image exists: %v", err)
+					log.Printf("Error while checking if image exists: %v", err)
+					continue
 				}
+				if exists {
+					log.Printf("Blob found")
 
-				log.Printf("Blob found")
-				start := time.Now()
-				reader, err := hub.DownloadBlob(containerReg.Repository, digest)
-				elapsed := time.Since(start)
-				if reader != nil {
-					defer reader.Close()
+					start := time.Now()
+					reader, err := hub.DownloadBlob(containerReg.Repository, digest)
+					if reader != nil {
+						defer reader.Close()
+					}
+					elapsed := time.Since(start)
+					if err != nil {
+						log.Printf("Error while pulling layer: %s", err)
+						continue
+					}
+					log.Printf("Blob downloaded successfully: %v", elapsed)
+					benchmarkData[1+i+x*config.ImageGeneration.LayerNumber] = []string{containerReg.Platform, strconv.Itoa(i), elapsed.String()}
 				}
-				if err != nil {
-					log.Fatalf("Error while pulling layer: %s", err)
-				}
-				log.Printf("Blob downloaded successfully: %v", elapsed)
-				benchmarkData[1+i+x*config.ImageGeneration.LayerNumber] = []string{containerReg.Platform, strconv.Itoa(i), elapsed.String()}
-
 			}
 		}
 		if writeToCSV == true {

@@ -37,7 +37,8 @@ var pushCmd = &cobra.Command{
 
 			hub, err := auth.AuthenticateRegistry(containerReg, yamlFilename)
 			if err != nil {
-				log.Fatalf("Error initializing a registry client: %v", err)
+				log.Printf("Error initializing a registry client: %v", err)
+				continue
 			}
 			items, _ := ioutil.ReadDir(filepath)
 			for i, item := range items {
@@ -48,13 +49,18 @@ var pushCmd = &cobra.Command{
 				log.Printf("Checking for blob in repository")
 				exists, err := hub.HasBlob(containerReg.Repository, digest)
 				if err != nil {
-					log.Fatalf("Error while checking if image exists: %v", err)
+					log.Printf("Error while checking if image exists: %v", err)
+					continue
 				}
 				if !exists {
 					log.Printf("Blob not found")
 					file, _ := ioutil.ReadFile(filepath + item.Name())
 					start := time.Now()
-					hub.UploadBlob(containerReg.Repository, digest, bytes.NewReader(file), nil)
+					err := hub.UploadBlob(containerReg.Repository, digest, bytes.NewReader(file), nil)
+					if err != nil {
+						log.Printf("Error uploading blob: %v", err)
+						continue
+					}
 					elapsed := time.Since(start)
 					log.Printf("Blob uploaded successfully: %v", elapsed)
 					benchmarkData[1+i+x*config.ImageGeneration.LayerNumber] = []string{containerReg.Platform, strconv.Itoa(i), elapsed.String()}
