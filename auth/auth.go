@@ -18,6 +18,9 @@ func AuthenticateRegistry(containerReg config.Registry, filename string) (*regis
 			return nil, err
 		}
 		password = strings.TrimPrefix(token, "AWS:")
+		if []byte(password[len(password)-1:])[0] == []byte{0}[0] {
+			password = password[:len(password)-1]
+		}
 	} else if strings.HasPrefix(containerReg.Platform, "gcr") {
 		log.Println("Entering get auth key")
 		password, _ = GetGCRAuthorizationKey(filename)
