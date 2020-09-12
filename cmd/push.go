@@ -63,9 +63,11 @@ var pushCmd = &cobra.Command{
 		}
 		if writeToCSV == true {
 			dt := time.Now()
-			csvFile, err := os.Create("push-" + strconv.Itoa(config.ImageGeneration.ImgSizeMb) + "-" + strconv.Itoa(config.ImageGeneration.LayerNumber) + "-" + dt.String() + ".csv")
-			if err != nil {
-				log.Fatalf("failed creating file: %s", err)
+			var csvFile *os.File
+			if cronJob == true {
+				csvFile, _ = imggen.Create("long-running/push-" + strconv.Itoa(config.ImageGeneration.ImgSizeMb) + "-" + strconv.Itoa(config.ImageGeneration.LayerNumber) + "-" + dt.String() + ".csv")
+			} else {
+				csvFile, _ = os.Create("push-" + strconv.Itoa(config.ImageGeneration.ImgSizeMb) + "-" + strconv.Itoa(config.ImageGeneration.LayerNumber) + "-" + dt.String() + ".csv")
 			}
 			var csvwriter = csv.NewWriter(csvFile)
 			for _, row := range benchmarkData {

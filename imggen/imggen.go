@@ -24,7 +24,8 @@ type Config struct {
 	PullSourceFolder string `yaml:"pull-source-folder,omitempty"`
 }
 
-func create(p string) (*os.File, error) {
+// Create creates a new folder
+func Create(p string) (*os.File, error) {
 	if err := os.MkdirAll(filepath.Dir(p), 0770); err != nil {
 		return nil, err
 	}
@@ -64,7 +65,7 @@ func Generate(yamlFilename string) string {
 	}
 	for i := 0; i < config.ImageGeneration.LayerNumber; i++ {
 		hexval, _ := randomHex(32)
-		fd, err := create(filepath + hexval)
+		fd, err := Create(filepath + hexval)
 		if err != nil {
 			log.Fatalf("Failed to create file: %v", err)
 		}
