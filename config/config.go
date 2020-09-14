@@ -10,14 +10,15 @@ import (
 
 // Registry is the struct for single registry config
 type Registry struct {
-	Platform   string
-	ImageURL   string `yaml:"image-url,omitempty"`
-	URL        string `yaml:"registry-url,omitempty"`
-	Username   string
-	Password   string
-	Repository string
-	AccountID  string `yaml:"account-id,omitempty"`
-	Region     string
+	Platform     string
+	ImageURL     string `yaml:"image-url,omitempty"`
+	URL          string `yaml:"registry-url,omitempty"`
+	Username     string
+	Password     string
+	Repository   string
+	AccountID    string `yaml:"account-id,omitempty"`
+	Region       string
+	WithManifest bool `yaml:"upload-manifest,omitempty"`
 }
 
 // Config is the configuration for the benchmark
