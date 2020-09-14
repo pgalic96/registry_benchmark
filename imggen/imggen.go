@@ -93,5 +93,6 @@ func Generate(yamlFilename string) string {
 
 		log.Printf("Docker layer generated")
 	}
+
 	return filepath
 }

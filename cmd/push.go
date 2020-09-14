@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
+	"strings"
 
 	"log"
 	"time"
@@ -41,6 +42,8 @@ var pushCmd = &cobra.Command{
 				continue
 			}
 			items, _ := ioutil.ReadDir(filepath)
+			manifest, configDigest := imggen.GenerateManifest(items, yamlFilename)
+
 			for i, item := range items {
 				digest := digest.NewDigestFromHex(
 					"sha256",
@@ -64,6 +67,19 @@ var pushCmd = &cobra.Command{
 					elapsed := time.Since(start)
 					log.Printf("Blob uploaded successfully: %v", elapsed)
 					benchmarkData[1+i+x*config.ImageGeneration.LayerNumber] = []string{containerReg.Platform, strconv.Itoa(i), elapsed.String()}
+				}
+			}
+
+			if containerReg.WithManifest {
+				file, _ := ioutil.ReadFile(strings.TrimPrefix(configDigest.String(), "sha256:"))
+				err = hub.UploadBlob(containerReg.Repository, configDigest, bytes.NewReader(file), nil)
+				if err != nil {
+					log.Printf("Error uploading image config: %v", err)
+				}
+				log.Println("Pushing manifest")
+				err = hub.PutManifest(containerReg.Repository, "latest", manifest)
+				if err != nil {
+					log.Printf("Error uploading manifest: %v", err)
 				}
 			}
 		}
