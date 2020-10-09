@@ -42,7 +42,6 @@ var pushCmd = &cobra.Command{
 				continue
 			}
 			items, _ := ioutil.ReadDir(filepath)
-			manifest, configDigest := imggen.GenerateManifest(items, yamlFilename)
 
 			for i, item := range items {
 				digest := digest.NewDigestFromHex(
@@ -71,7 +70,9 @@ var pushCmd = &cobra.Command{
 			}
 
 			if containerReg.WithManifest {
-				file, _ := ioutil.ReadFile(strings.TrimPrefix(configDigest.String(), "sha256:"))
+				manifest, configDigest := imggen.GenerateManifest(items, yamlFilename)
+				configFilename := strings.TrimPrefix(configDigest.String(), "sha256:")
+				file, _ := ioutil.ReadFile(configFilename)
 				err = hub.UploadBlob(containerReg.Repository, configDigest, bytes.NewReader(file), nil)
 				if err != nil {
 					log.Printf("Error uploading image config: %v", err)
@@ -80,6 +81,10 @@ var pushCmd = &cobra.Command{
 				err = hub.PutManifest(containerReg.Repository, "latest", manifest)
 				if err != nil {
 					log.Printf("Error uploading manifest: %v", err)
+				}
+				e := os.Remove(configFilename)
+				if e != nil {
+					log.Print(e)
 				}
 			}
 		}

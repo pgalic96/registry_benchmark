@@ -9,13 +9,13 @@ import (
 	"github.com/pgalic96/docker-registry-client/registry"
 )
 
-// AuthenticateRegistry authenticates with the provided registry using config provided in yaml
-func AuthenticateRegistry(containerReg config.Registry, filename string) (*registry.Registry, error) {
+// ObtainRegistryCredentials returns username and password for the given registry
+func ObtainRegistryCredentials(containerReg config.Registry, filename string) (string, string, error) {
 	var password string
 	if strings.HasPrefix(containerReg.Platform, "ecr") {
 		token, err := GetECRAuthorizationToken(containerReg.AccountID, containerReg.Region)
 		if err != nil {
-			return nil, err
+			return "", "", err
 		}
 		password = strings.TrimPrefix(token, "AWS:")
 		if []byte(password[len(password)-1:])[0] == []byte{0}[0] {
@@ -27,11 +27,16 @@ func AuthenticateRegistry(containerReg config.Registry, filename string) (*regis
 	} else {
 		password = containerReg.Password
 	}
-	// password = strings.TrimSuffix(password, password[len(password)-1:])
-	log.Println(password)
-	log.Println(len(password))
+	return containerReg.Username, password, nil
+}
 
-	hub, err := registry.New(containerReg.URL, containerReg.Username, password)
+// AuthenticateRegistry authenticates with the provided registry using config provided in yaml
+func AuthenticateRegistry(containerReg config.Registry, filename string) (*registry.Registry, error) {
+	username, password, err := ObtainRegistryCredentials(containerReg, filename)
+	if err != nil {
+		return nil, err
+	}
+	hub, err := registry.New(containerReg.URL, username, password)
 	if err != nil {
 		return nil, err
 	}

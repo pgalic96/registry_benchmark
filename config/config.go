@@ -23,12 +23,13 @@ type Registry struct {
 
 // Config is the configuration for the benchmark
 type Config struct {
-	Registries       []Registry
-	ImageGeneration  imggen.ImgGen `yaml:"image-generation,omitempty"`
-	ImageName        string        `yaml:"image-name,omitempty"`
-	Iterations       int
-	StorageURL       string `yaml:"storage-url,omitempty"`
-	PullSourceFolder string `yaml:"pull-source-folder,omitempty"`
+	Registries        []Registry
+	ImageGeneration   imggen.ImgGen `yaml:"image-generation,omitempty"`
+	ImageName         string        `yaml:"image-name,omitempty"`
+	Iterations        int           `yaml:"iterations,omitempty"`
+	StorageURL        string        `yaml:"storage-url,omitempty"`
+	PullSourceFolder  string        `yaml:"pull-source-folder,omitempty"`
+	TraceReplayerPath string        `yaml:"trace-replayer-path,omitempty"`
 }
 
 // LoadConfig is the function for loading configuration from yaml file
