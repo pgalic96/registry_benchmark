@@ -28,7 +28,6 @@ func loadConfig(yamlFilename string) (*Config, error) {
 // GetGCRAuthorizationKey obtains key for authenticating with Google Cloud Registry
 func GetGCRAuthorizationKey(filename string) (string, error) {
 	config, _ := loadConfig(filename)
-	log.Println(config.GoogleRegistryKey)
 	content, err := ioutil.ReadFile(config.GoogleRegistryKey)
 	if err != nil {
 		return "", err
