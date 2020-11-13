@@ -8,7 +8,7 @@ import (
 )
 
 var writeToCSV bool
-var yamlFilename string
+var YamlFilename string
 var cronJob bool
 
 var rootCmd = &cobra.Command{
@@ -26,7 +26,7 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&yamlFilename, "yaml", "y", "config.yaml", "benchmark config file name")
+	rootCmd.PersistentFlags().StringVarP(&YamlFilename, "yaml", "y", "config.yaml", "benchmark config file name")
 	rootCmd.PersistentFlags().BoolVarP(&writeToCSV, "csv", "c", false, "write to local csv file")
 	rootCmd.PersistentFlags().BoolVarP(&cronJob, "long-running", "l", false, "Flag that determines whether the experiment is long running or not")
 }

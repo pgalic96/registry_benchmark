@@ -14,6 +14,7 @@ import (
 
 var authOnly bool
 var deployment string
+var RegistryConfig *registryconfig.Config
 
 func init() {
 	traceReplayerCmd.Flags().BoolVarP(&authOnly, "auth-only", "a", false, "Obtain and store credentials in .env only")
@@ -26,10 +27,10 @@ var traceReplayerCmd = &cobra.Command{
 	Short: "Benchmark registries using real world traces",
 	Long:  "Use trace replayer to replay IBM traces",
 	Run: func(cmd *cobra.Command, args []string) {
-		config, _ := registryconfig.LoadConfig(yamlFilename)
+		RegistryConfig, _ := registryconfig.LoadConfig(YamlFilename)
 		if deployment == "local" {
-			for _, containerReg := range config.Registries {
-				username, password, _ := auth.ObtainRegistryCredentials(containerReg, yamlFilename)
+			for _, containerReg := range RegistryConfig.Registries {
+				username, password, _ := auth.ObtainRegistryCredentials(containerReg, YamlFilename)
 
 				traceReplayerConfig := registryconfig.TraceReplayerCredentials{
 					Username:   username,
@@ -38,13 +39,13 @@ var traceReplayerCmd = &cobra.Command{
 					URL:        strings.TrimSuffix(strings.TrimPrefix(containerReg.URL, "https://"), "/"),
 				}
 
-				err := registryconfig.SetTraceReplayerEnvVariables(traceReplayerConfig, config.ReplayerConfig)
+				err := registryconfig.SetTraceReplayerEnvVariables(traceReplayerConfig, RegistryConfig.ReplayerConfig, []string{"localhost:8080", "localhost:8081"})
 				if err != nil {
 					log.Fatalf("Error while setting env variables: %v", err)
 				}
 
 				if !authOnly {
-					err = tracereplayer.RunTraceReplayerLocal(config.ReplayerConfig.TraceDir)
+					err = tracereplayer.RunTraceReplayerLocal(RegistryConfig.ReplayerConfig.TraceDir)
 					if err != nil {
 						log.Fatalf("Error while running trace replayer: %v", err)
 					}
@@ -52,7 +53,8 @@ var traceReplayerCmd = &cobra.Command{
 			}
 
 		} else if deployment == "das" {
-			tracereplayer.RunTraceReplayerDas()
+			log.Println("Deploying files to DAS...")
+			tracereplayer.DeployTraceReplayerDas()
 		}
 	},
 }
