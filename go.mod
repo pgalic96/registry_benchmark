@@ -5,6 +5,7 @@ go 1.14
 require (
 	github.com/Microsoft/go-winio v0.4.14 // indirect
 	github.com/aws/aws-sdk-go v1.34.18
+	github.com/bramvdbogaerde/go-scp v0.0.0-20200820121624-ded9ee94aef5
 	github.com/containerd/containerd v1.4.0
 	github.com/containerd/ttrpc v1.0.1 // indirect
 	github.com/containerd/typeurl v1.0.1 // indirect

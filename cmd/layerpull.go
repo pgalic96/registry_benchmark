@@ -28,13 +28,13 @@ var layerPullCmd = &cobra.Command{
 	Short: "Benchmark docker pull with http",
 	Long:  `layerpull measures latency when pulling previously pushed generated image layers`,
 	Run: func(cmd *cobra.Command, args []string) {
-		config, _ := config.LoadConfig(yamlFilename)
+		config, _ := config.LoadConfig(YamlFilename)
 
 		var benchmarkData = make([][]string, len(config.Registries)*config.ImageGeneration.LayerNumber+1)
 		benchmarkData[0] = []string{"platform", "layer", "latency"}
 
 		for x, containerReg := range config.Registries {
-			hub, err := auth.AuthenticateRegistry(containerReg, yamlFilename)
+			hub, err := auth.AuthenticateRegistry(containerReg, YamlFilename)
 			if err != nil {
 				log.Printf("Error initializing a registry client: %v", err)
 				continue

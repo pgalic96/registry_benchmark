@@ -16,8 +16,8 @@ type TraceReplayerCredentials struct {
 
 // TraceReplayerConfig contains finer grained config for trace replayer
 type TraceReplayerConfig struct {
-	TracePath     string `yaml:"trace-path,omitempty"`
-	Clients       []string
+	TracePath     string   `yaml:"trace-path,omitempty"`
+	ClientsNumber int      `yaml:"clients-number,omitempty"`
 	ClientThreads int      `yaml:"client-threads,omitempty"`
 	TraceDir      string   `yaml:"trace-directory,omitempty"`
 	TraceFiles    []string `yaml:"trace-files,omitempty"`
@@ -30,12 +30,12 @@ type TraceReplayerConfig struct {
 }
 
 // SetTraceReplayerEnvVariables sets env variables for the trace replayer to authenticate with registry
-func SetTraceReplayerEnvVariables(traceReplayerCreds TraceReplayerCredentials, traceReplayerConfig TraceReplayerConfig) error {
+func SetTraceReplayerEnvVariables(traceReplayerCreds TraceReplayerCredentials, traceReplayerConfig TraceReplayerConfig, clientIPs []string) error {
 	envVariables := []byte("REGISTRY_USERNAME=" + traceReplayerCreds.Username +
 		"\nREGISTRY_PASSWORD=" + traceReplayerCreds.Password +
 		"\nREGISTRY_REPO=" + traceReplayerCreds.Repository +
 		"\nREGISTRY_URL=" + traceReplayerCreds.URL +
-		"\nCLIENTS=" + strings.Join(traceReplayerConfig.Clients, ",") +
+		"\nCLIENTS=" + strings.Join(clientIPs, ",") +
 		"\nCLIENT_THREADS=" + strconv.Itoa(traceReplayerConfig.ClientThreads) +
 		"\nTRACE_DIRECTORY=" + traceReplayerConfig.TraceDir +
 		"\nTRACE_FILES=" + strings.Join(traceReplayerConfig.TraceFiles, ",") +

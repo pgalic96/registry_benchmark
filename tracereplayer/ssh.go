@@ -7,15 +7,16 @@ import (
 	"os"
 	"sync"
 
+	scp "github.com/bramvdbogaerde/go-scp"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/knownhosts"
 )
 
-func newDASSession() (*ssh.Session, error) {
+func newDASClient() (*ssh.Client, *ssh.Client, error) {
 	knownHostsDir := fmt.Sprintf("%s.ssh/known_hosts", homeDir)
 	hostKeyCallback, err := knownhosts.New(knownHostsDir)
 	if err != nil {
-		log.Fatal(err)
+		return nil, nil, err
 	}
 	sshconfig := &ssh.ClientConfig{
 		User: Config.DasCredentials.Username,
@@ -27,7 +28,7 @@ func newDASSession() (*ssh.Session, error) {
 
 	client, err := ssh.Dial("tcp", Config.VunetCredentials.SSHConnection, sshconfig)
 	if err != nil {
-		log.Fatal("Failed to dial: ", err)
+		return nil, nil, err
 	}
 	log.Println("Succeded connection to jumphost")
 
@@ -41,22 +42,23 @@ func newDASSession() (*ssh.Session, error) {
 
 	conn, err := client.Dial("tcp", Config.DasCredentials.DasConnection)
 	if err != nil {
-		log.Fatal(err)
+		return nil, nil, err
 	}
 	log.Println("Succeeded dialing das")
 
 	ncc, chans, reqs, err := ssh.NewClientConn(conn, Config.DasCredentials.DasConnection, dasconfig)
 	if err != nil {
-		log.Fatal(err)
+		return nil, nil, err
 	}
 	log.Println("Established new client connection to DAS")
 	sClient := ssh.NewClient(ncc, chans, reqs)
 
-	return sClient.NewSession()
+	return client, sClient, nil
 }
 
-func sendFilesToDas(session *ssh.Session, filename string) error {
+func sendFilesToDas(session *ssh.Session, filename string, fileLocation string) error {
 	file, err := os.Open(filename)
+
 	if err != nil {
 		return err
 	}
@@ -79,9 +81,36 @@ func sendFilesToDas(session *ssh.Session, filename string) error {
 		wg.Done()
 	}()
 
-	command := fmt.Sprintf("/usr/bin/scp -t /home/%s/", Config.DasCredentials.Username)
+	command := fmt.Sprintf("/usr/bin/scp -t /home/%s/", fileLocation)
 
 	session.Run(command)
 	wg.Wait()
 	return nil
+}
+
+func deployEnvFileToDAS(filepath string) error {
+	jumpClient, client, err := newDASClient()
+	defer client.Close()
+	defer jumpClient.Close()
+	if err != nil {
+		return err
+	}
+	scpClient, err := scp.NewClientBySSH(client)
+	err = scpClient.Connect()
+	if err != nil {
+		return err
+	}
+	f, _ := os.Open(filepath)
+	// Close client connection after the file has been copied
+	defer scpClient.Close()
+
+	// Close the file after it has been copied
+	defer f.Close()
+
+	err = scpClient.CopyFile(f, "/home/pgc300/thesis/docker-performance/.env", "0655")
+
+	if err != nil {
+		fmt.Println("Error while copying file ", err)
+	}
+	return err
 }
