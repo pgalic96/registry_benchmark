@@ -9,6 +9,8 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"registry_benchmark/auth"
+	"registry_benchmark/config"
 	"strings"
 
 	"gopkg.in/yaml.v2"
@@ -23,6 +25,10 @@ type DeploymentConfig struct {
 	TraceReplayerConfigPath string           `yaml:"trace-replayer-config-path,omitempty"`
 	VunetCredentials        VunetCredentials `yaml:"vunet-credentials"`
 	DasCredentials          DasCredentials   `yaml:"das-credentials"`
+	ClientScript            string           `yaml:"client-script"`
+	PrefetchScript          string           `yaml:"prefetch-script"`
+	RunScript               string           `yaml:"run-script"`
+	ClientList              []string         `yaml:"das-client-nodes"`
 }
 
 type VunetCredentials struct {
@@ -39,9 +45,11 @@ type DasCredentials struct {
 // Config is a Deployment Config used across tracereplayer package
 var Config *DeploymentConfig
 var homeDir string
+var registryConfig *config.Config
 
-func RunTraceReplayerDas() {
+func DeployTraceReplayerDas() {
 	Config, _ = loadConfig("das-config.yaml")
+	registryConfig, _ = config.LoadConfig(Config.TraceReplayerConfigPath)
 	usr, err := user.Current()
 	if err != nil {
 		log.Fatal(err)
@@ -51,7 +59,7 @@ func RunTraceReplayerDas() {
 	// Bundle files
 	traceFiles := getFilesInDir(Config.TracePath)
 	traceReplayerFiles := getFilesInDir(Config.TraceReplayerPath)
-	files := []string{Config.GcloudKey, Config.AwsCredentialsPath, Config.TraceReplayerConfigPath, "registry_benchmark"}
+	files := []string{Config.GcloudKey, Config.AwsCredentialsPath, Config.TraceReplayerConfigPath, Config.PrefetchScript, Config.ClientScript, Config.RunScript}
 	files = append(files, traceFiles...)
 	files = append(files, traceReplayerFiles...)
 	output := "done.zip"
@@ -63,17 +71,88 @@ func RunTraceReplayerDas() {
 	// Copy files to DAS via scp
 	log.Println("Copying bundled files to DAS...")
 	//results := make(chan string, 10)
-	session, err := newDASSession()
-	if err != nil {
-		log.Fatal("Failed to create session: ", err)
-	}
-	defer session.Close()
-	log.Println("Established session at das")
-
-	err = sendFilesToDas(session, output)
+	jumpClient, client, err := newDASClient()
 	if err != nil {
 		log.Fatal(err)
 	}
+	session, err := client.NewSession()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Established session at das")
+
+	err = sendFilesToDas(session, output, Config.DasCredentials.Username)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Files copied successfully.")
+	session.Close()
+	client.Close()
+	jumpClient.Close()
+
+	log.Println("Unpacking files...")
+	jumpClient, client, err = newDASClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+	session, err = client.NewSession()
+	if err != nil {
+		log.Fatal(err)
+	}
+	session.Run("/usr/bin/unzip -o /home/pgc300/done.zip")
+	session.Close()
+	client.Close()
+	jumpClient.Close()
+	log.Println("Files unpacked")
+
+	// resultFileList := make([]string, len(registryConfig.Registries))
+
+	go func() {
+		err := runClients()
+		if err != nil {
+			log.Fatalf("Error obtained while running clients: %v", err)
+			return
+		}
+	}()
+
+	for _, registry := range registryConfig.Registries {
+		// Set env file
+		username, password, _ := auth.ObtainRegistryCredentials(registry, "config-pull.yaml")
+		traceReplayerConfig := config.TraceReplayerCredentials{
+			Username:   username,
+			Password:   strings.ReplaceAll(password, "\n", ""),
+			Repository: registry.Repository,
+			URL:        strings.TrimSuffix(strings.TrimPrefix(registry.URL, "https://"), "/"),
+		}
+		clientIPs := getClientIPs(Config.ClientList)
+		err := config.SetTraceReplayerEnvVariables(traceReplayerConfig, registryConfig.ReplayerConfig, clientIPs)
+		if err != nil {
+			log.Fatalf("Error setting trace replayer env variables: %v", err)
+		}
+		log.Println("Sending env file to DAS")
+		err = deployEnvFileToDAS(Config.TraceReplayerPath + "/.env")
+		if err != nil {
+			log.Fatalf("Error copying .env file to DAS: %v", err)
+		}
+
+		err = runMasterPrefetch()
+		if err != nil {
+			log.Fatalf("Error while running master prefetch: %v", err)
+		}
+
+		err = runMasterRun()
+		if err != nil {
+			log.Fatalf("Error while running master prefetch: %v", err)
+		}
+	}
+
+	resultsFilePath, err := extractResults(registryConfig.ReplayerConfig.ResultsDir)
+	if err != nil {
+		log.Fatalf("Error while extracting results: %v", err)
+	}
+
+	log.Println("Successfully extracted results at following path: " + resultsFilePath)
+
 }
 
 func loadConfig(filename string) (*DeploymentConfig, error) {
@@ -158,4 +237,13 @@ func getFilesInDir(pathname string) []string {
 		panic(err)
 	}
 	return files
+}
+
+func getClientIPs(clientNames []string) []string {
+	clientIPs := make([]string, len(clientNames))
+	for i, clientName := range clientNames {
+		clientIPs[i] = fmt.Sprintf("10.141.0.%s:8084", strings.TrimPrefix(clientName, "node0"))
+		log.Println(clientIPs[i])
+	}
+	return clientIPs
 }
