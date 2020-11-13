@@ -13,13 +13,18 @@ import (
 func ObtainRegistryCredentials(containerReg config.Registry, filename string) (string, string, error) {
 	var password string
 	if strings.HasPrefix(containerReg.Platform, "ecr") {
-		token, err := GetECRAuthorizationToken(containerReg.AccountID, containerReg.Region)
-		if err != nil {
-			return "", "", err
-		}
-		password = strings.TrimPrefix(token, "AWS:")
-		if []byte(password[len(password)-1:])[0] == []byte{0}[0] {
-			password = password[:len(password)-1]
+		if containerReg.Password == "" {
+			token, err := GetECRAuthorizationToken(containerReg.AccountID, containerReg.Region)
+			//log.Printf("AUTH TOKEN: %v", token)
+			if err != nil {
+				return "", "", err
+			}
+			password = strings.TrimPrefix(token, "AWS:")
+			if []byte(password[len(password)-1:])[0] == []byte{0}[0] {
+				password = password[:len(password)-1]
+			}
+		} else {
+			password = containerReg.Password
 		}
 	} else if strings.HasPrefix(containerReg.Platform, "gcr") {
 		log.Println("Entering get auth key")
