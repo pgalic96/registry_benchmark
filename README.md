@@ -1,4 +1,4 @@
-# Registry benchmarking toolkit
+# Registry benchmarking instrument
 
 ## Available commands
 
