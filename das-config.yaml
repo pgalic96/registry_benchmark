@@ -1,0 +1,16 @@
+gcloud-key: 
+aws-credentials-path: 
+trace-replayer-path: 
+trace-path: 
+trace-replayer-config-path: 
+vunet-credentials:
+  ssh-connection: 
+  password: 
+das-credentials:
+  das-connection: 
+  username: 
+  password: 
+client-script: 
+prefetch-script: 
+run-script: 
+das-client-nodes: []
