@@ -22,7 +22,7 @@ func runClients() error {
 	}
 	session.Stdout = os.Stdout
 	session.Stderr = os.Stderr
-	clientCommand := fmt.Sprintf("srun -N%d --nodelist=%s -t 120  /usr/bin/bash client.sh", registryConfig.ReplayerConfig.ClientsNumber, strings.Join(Config.ClientList, ","))
+	clientCommand := fmt.Sprintf("srun -N%d --nodelist=%s -t 180  /usr/bin/bash client.sh", registryConfig.ReplayerConfig.ClientsNumber, strings.Join(Config.ClientList, ","))
 	if err := session.Run(clientCommand); err != nil {
 		return err
 	}

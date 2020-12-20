@@ -19,7 +19,7 @@ func runMasterPrefetch() error {
 	session.Stdout = os.Stdout
 	session.Stderr = os.Stderr
 
-	masterPrefetchCmd := "srun -N1 /usr/bin/bash master-prefetch.sh"
+	masterPrefetchCmd := "srun -N1 -t 120 /usr/bin/bash master-prefetch.sh"
 	if err := session.Run(masterPrefetchCmd); err != nil {
 		return err
 	}
@@ -43,7 +43,7 @@ func runMasterRun() error {
 	session.Stdout = os.Stdout
 	session.Stderr = os.Stderr
 
-	masterRunCmd := "srun -N1 /usr/bin/bash master-run.sh"
+	masterRunCmd := "srun -N1 -t 180 /usr/bin/bash master-run.sh"
 	if err := session.Run(masterRunCmd); err != nil {
 		return err
 	}
