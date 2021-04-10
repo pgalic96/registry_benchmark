@@ -107,7 +107,7 @@ func deployEnvFileToDAS(filepath string) error {
 	// Close the file after it has been copied
 	defer f.Close()
 
-	err = scpClient.CopyFile(f, "/home/pgc300/thesis/docker-performance/.env", "0655")
+	err = scpClient.CopyFile(f, "/home/user/thesis/docker-performance/.env", "0655")
 
 	if err != nil {
 		fmt.Println("Error while copying file ", err)

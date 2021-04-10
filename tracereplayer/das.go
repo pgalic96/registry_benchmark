@@ -99,7 +99,7 @@ func DeployTraceReplayerDas() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	session.Run("/usr/bin/unzip -o /home/pgc300/done.zip")
+	session.Run("/usr/bin/unzip -o /home/user/done.zip")
 	session.Close()
 	client.Close()
 	jumpClient.Close()

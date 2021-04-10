@@ -14,7 +14,7 @@ var cronJob bool
 var rootCmd = &cobra.Command{
 	Use:   "benchmarkd",
 	Short: "Docker registry benchmark",
-	Long:  `Registry benchmark created by pgalic96, intended to measure different metrics related to container registry performance`,
+	Long:  `Registry benchmark created by anonymous, intended to measure different metrics related to container registry performance`,
 }
 
 // Execute executes
