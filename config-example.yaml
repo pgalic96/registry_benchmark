@@ -1,0 +1,70 @@
+registries:
+  - platform: gcr-eu
+    registry-url: https://eu.gcr.io/
+    username: _json_key
+    repository: registry-benchmark
+    region: eu-west
+    upload-manifest: true
+  - platform: alibaba
+    registry-url: https://registry-intl.ap-southeast-1.aliyuncs.com/
+    username: p.galic96@gmail.com
+    password: 
+    repository: regbench/reg-bench
+    upload-manifest: true
+  - platform: dockerhub
+    registry-url: https://registry-1.docker.io/
+    username: pgc300
+    password: 
+    repository: pgc300/registry-benchmark
+    upload-manifest: true
+  - platform: quay
+    registry-url: https://quay.io/
+    username: petargalic
+    password: 
+    repository: petargalic/registry-benchmark
+    upload-manifest: true
+  - platform: gitlab
+    registry-url: https://registry.gitlab.com/
+    username: petargalic
+    password: 
+    repository: petargalic/registry-benchmark
+    upload-manifest: true
+  - platform: azure-eu-west
+    registry-url: https://regbench.azurecr.io/
+    username: regbench
+    password: 
+    repository: registry-benchmark
+    upload-manifest: true
+  - platform: ecr-eu-central-1
+    registry-url: https://133132736141.dkr.ecr.eu-central-1.amazonaws.com/
+    username: AWS
+    password: 
+    repository: registry-benchmark
+    account-id: 
+    region: eu-central-1
+    upload-manifest: true
+
+image-name: alpine
+
+gcloud-key: 
+
+pull-source-folder: 
+
+trace-replayer: 
+  trace-path: 
+  clients-number: 3
+  client-threads: 100
+  trace-directory: 
+  trace-files:
+    #- prod-dal09-logstash-2017.07.21-0.json
+    #- prod-dal09-logstash-2017.07.21-1.json
+    #- prod-dal09-logstash-2017.07.21-3.json
+  wait: true
+  warmup-threads: 10
+  master-port: 8086
+  results-directory: 
+image-generation:
+  img-size-mb: 10
+  layer-number: 10
+  generate-random: true
+  
