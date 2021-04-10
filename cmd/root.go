@@ -12,7 +12,7 @@ var YamlFilename string
 var cronJob bool
 
 var rootCmd = &cobra.Command{
-	Use:   "benchmarkd",
+	Use:   "creb",
 	Short: "Docker registry benchmark",
 	Long:  `Registry benchmark created by anonymous, intended to measure different metrics related to container registry performance`,
 }
