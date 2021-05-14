@@ -45,7 +45,7 @@ var traceReplayerCmd = &cobra.Command{
 				}
 
 				if !authOnly {
-					err = tracereplayer.RunTraceReplayerLocal(RegistryConfig.ReplayerConfig.TraceDir)
+					err = tracereplayer.RunTraceReplayerLocal(RegistryConfig.ReplayerConfig.TracePath)
 					if err != nil {
 						log.Fatalf("Error while running trace replayer: %v", err)
 					}
