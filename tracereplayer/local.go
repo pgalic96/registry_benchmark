@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"os"
 )
 
 const python string = "python2"
@@ -24,6 +25,8 @@ func RunTraceReplayerLocal(path string) error {
 	// Run registry warmup
 	log.Println("Starting warmup")
 	warmupCommand := exec.Command(python, master, command, warmup, i, conf)
+	warmupCommand.Stdout = os.Stdout
+	warmupCommand.Stderr = os.Stderr
 	warmupCommand.Dir = path
 	log.Println(warmupCommand.Dir)
 	err := warmupCommand.Run()
@@ -34,7 +37,11 @@ func RunTraceReplayerLocal(path string) error {
 
 	// Run clients
 	clientCommand1 := exec.Command(python, clnt, i, localhost, port, p1)
+	clientCommand1.Stdout = os.Stdout
+	clientCommand1.Stderr = os.Stderr
 	clientCommand2 := exec.Command(python, clnt, i, localhost, port, p2)
+	clientCommand2.Stdout = os.Stdout
+	clientCommand2.Stderr = os.Stderr
 
 	clientCommand1.Dir = path
 	clientCommand2.Dir = path

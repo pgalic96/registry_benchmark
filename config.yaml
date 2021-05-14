@@ -1,31 +1,34 @@
-registries: # add as many platforms as wished
- - platform: # name of the platform, to be saved in the results
-   registry-url: # url for registry API requests
-   username: # registry username
-   password:  # registry password
-   repository:  # registry repository, syntax depends on the registry used, usually username/repository
-   upload-manifest: # generate and push manifest together with layers
-   region: # region for the experiment, use only with private registries
-   account-id: # used for AWS ECR testing, can be removed otherwise
+# Registry defintions; add an entry for each registry that should be benchmarked.
+registries:         
+ - platform:        # Provide a custom name for the platform, which is used to identify the results. (e.g., my-docker-test).
+   registry-url:    # URL for registry API requests (e.g., https://registry-1.docker.io/).
+   username:        # Registry username.
+   password:        # Registry password.
+   repository:      # Registry repository. The syntax depends on the registry used, usually username/repository (in case of Docker).
+   upload-manifest: # Whether CReB should generate and push the manifest together with layers (true) or only the layers (false).
+   region:          # Region for the experiment, generally used only by private registries.
+   account-id:      # Required for authenticating with AWS ECR testing (it is ignored for others).
 
-pull-source-folder: 10-10-57a426 # folder for generated layes and images that are stored for push and pull experiments
+gcloud-key:         # Used for google cloud authentication (JSON key authentication)
+pull-source-folder: # Directory where the generated layers and images are stored for push and pull experiments.
 
-image-generation: # config for generating synthetic image, size of the layer is full size of the image divided by the layer number
-  img-size-mb: 1 # full size of the image
-  layer-number: 1 # number of layers
-  generate-random: true # generate all zero's (false) or random bytes (true)
+# Config for generating a synthetic image.
+image-generation:
+  img-size-mb: 1        # The total size of the image. The layer size is the total size divided by the number of layers.
+  layer-number: 1       # Number of layers of each image.
+  generate-random: true # Generate all zero's (false) or random bytes (true).
 
-gcloud-key: # used for google cloud authentication (JSON key authentication)
 
+# Config for the trace replayer (TR).
 trace-replayer: 
-  trace-path:  # path for the traces
-  clients-number: 3 # number of TR clients
-  client-threads: 100 # number of threads per client
-  trace-directory:  # trace-directory for DAS ex: /home/user/trace
-  trace-files: # name of the trace file, without the full path, full path should be trace-path/trace-files-name
+  trace-path:           # Path to the directory containing the trace files.
+  trace-files:          # Names of the trace files to use (without the full path). Should be formatted as an array.
+  trace-directory:      # Path to the directory with the TR sources; basically the path to a clone of https://github.com/pgalic96/docker-performance
+  clients-number: 3     # Number of TR clients
+  client-threads: 100   # Number of threads per client
     
-  wait: true # delay (true) and stress (false)
-  warmup-threads: 10 # number of threads that the master is used for prewarming
-  master-port: 8086 # port for the master
-  results-directory:  # path for the results directory
+  wait: true            # Specificy the execution mode: delay (true) and stress (false)
+  warmup-threads: 10    # Number of threads that the master should use for prewarming
+  master-port: 8086     # Port for the TR master.
+  results-directory:    # Path to the directory where the results should be stored.
   
