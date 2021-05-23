@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
@@ -22,6 +23,13 @@ func init() {
 	rootCmd.AddCommand(traceReplayerCmd)
 }
 
+func generateClientPorts(clientNumber int) (clientPorts []string) {
+	for i := 0; i < clientNumber; i++ {
+		clientPorts = append(clientPorts, fmt.Sprintf("808%d", i))
+	}
+	return clientPorts
+}
+
 var traceReplayerCmd = &cobra.Command{
 	Use:   "trace-replayer",
 	Short: "Benchmark registries using real world traces",
@@ -38,14 +46,18 @@ var traceReplayerCmd = &cobra.Command{
 					Repository: containerReg.Repository,
 					URL:        strings.TrimSuffix(strings.TrimPrefix(containerReg.URL, "https://"), "/"),
 				}
-
-				err := registryconfig.SetTraceReplayerEnvVariables(traceReplayerConfig, RegistryConfig.ReplayerConfig, []string{"localhost:8080", "localhost:8081"})
+				clientPorts := generateClientPorts(RegistryConfig.ReplayerConfig.ClientsNumber)
+				var clients []string
+				for _, port := range clientPorts {
+					clients = append(clients, fmt.Sprintf("localhost:%s", port))
+				}
+				err := registryconfig.SetTraceReplayerEnvVariables(traceReplayerConfig, RegistryConfig.ReplayerConfig, clients)
 				if err != nil {
 					log.Fatalf("Error while setting env variables: %v", err)
 				}
 
 				if !authOnly {
-					err = tracereplayer.RunTraceReplayerLocal(RegistryConfig.ReplayerConfig.TracePath)
+					err = tracereplayer.RunTraceReplayerLocal(RegistryConfig.ReplayerConfig.TracePath, clientPorts)
 					if err != nil {
 						log.Fatalf("Error while running trace replayer: %v", err)
 					}
