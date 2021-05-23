@@ -62,6 +62,8 @@ trace-replayer:
   warmup-threads: 10
   master-port: 8086
   results-directory: 
+  limit-type: requests
+  limit-amount: seconds
 image-generation:
   img-size-mb: 10
   layer-number: 10

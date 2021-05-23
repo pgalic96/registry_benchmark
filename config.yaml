@@ -21,14 +21,15 @@ image-generation:
 
 # Config for the trace replayer (TR).
 trace-replayer: 
-  trace-path:           # Path to the directory containing the trace files.
+  trace-path:           # Path to the trace replayer directory; basically the path to a clone of https://github.com/pgalic96/docker-performance
   trace-files:          # Names of the trace files to use (without the full path). Should be formatted as an array.
-  trace-directory:      # Path to the directory with the TR sources; basically the path to a clone of https://github.com/pgalic96/docker-performance
+  trace-directory:      # Path to the directory with the IBM traces
   clients-number: 3     # Number of TR clients
   client-threads: 100   # Number of threads per client
-    
   wait: true            # Specificy the execution mode: delay (true) and stress (false)
   warmup-threads: 10    # Number of threads that the master should use for prewarming
   master-port: 8086     # Port for the TR master.
   results-directory:    # Path to the directory where the results should be stored.
+  limit-type:           # Type of limit of sample (requests or seconds)
+  limit-amount:         # Amount of the limit type (number of requests or number of seconds) from the sample.
   
