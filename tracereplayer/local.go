@@ -16,13 +16,12 @@ const command string = "-c"
 const warmup string = "warmup"
 const run string = "run"
 const i string = "-i"
-const conf string = "config.yaml"
 
 // RunTraceReplayerLocal locally deploys the trace replayer
 func RunTraceReplayerLocal(path string, clientPorts []string) error {
 	// Run registry warmup
 	log.Println("Starting warmup")
-	warmupCommand := exec.Command(python, master, command, warmup, i, conf)
+	warmupCommand := exec.Command(python, master, command, warmup)
 	warmupCommand.Stdout = os.Stdout
 	warmupCommand.Stderr = os.Stderr
 	warmupCommand.Dir = path
@@ -51,7 +50,7 @@ func RunTraceReplayerLocal(path string, clientPorts []string) error {
 		defer clientCommand.Process.Kill()
 	}
 	// Run master
-	masterCommand := exec.Command(python, master, command, run, i, conf)
+	masterCommand := exec.Command(python, master, command, run)
 	masterCommand.Dir = path
 	out, err := masterCommand.Output()
 	if err != nil {
