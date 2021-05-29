@@ -6,11 +6,11 @@ trace-replayer-config-path: config.yaml
 vunet-credentials:
   ssh-connection: ssh.data.vu.nl:22
   username: evk810
-  password: Niwre102@vunl
+  password: <TODO>
 das-credentials:
   das-connection: fs0.das5.cs.vu.nl:22
   username: evk810
-  password: 5qD3rQja
+  password: <TODO>
 client-script: master-run.sh
 prefetch-script: master-prefetch.sh
 run-script: client.sh
