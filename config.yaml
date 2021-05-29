@@ -1,10 +1,10 @@
 # Registry defintions; add an entry for each registry that should be benchmarked.
 registries:         
- - platform:        # Provide a custom name for the platform, which is used to identify the results. (e.g., my-docker-test).
-   registry-url:    # URL for registry API requests (e.g., https://registry-1.docker.io/).
-   username:        # Registry username.
-   password:        # Registry password.
-   repository:      # Registry repository. The syntax depends on the registry used, usually username/repository (in case of Docker).
+ - platform: quay   # Provide a custom name for the platform, which is used to identify the results. (e.g., my-docker-test).
+   registry-url: https://quay.io   # URL for registry API requests (e.g., https://registry-1.docker.io/).
+   username: petargalic       # Registry username.
+   password: petargalic123       # Registry password.
+   repository: petargalic/registry-benchmark      # Registry repository. The syntax depends on the registry used, usually username/repository (in case of Docker).
    upload-manifest: # Whether CReB should generate and push the manifest together with layers (true) or only the layers (false).
    region:          # Region for the experiment, generally used only by private registries.
    account-id:      # Required for authenticating with AWS ECR testing (it is ignored for others).
@@ -21,15 +21,16 @@ image-generation:
 
 # Config for the trace replayer (TR).
 trace-replayer: 
-  trace-path:           # Path to the trace replayer directory; basically the path to a clone of https://github.com/pgalic96/docker-performance
+  trace-path: /Users/erwin/projects/creb/docker-performance       
   trace-files:          # Names of the trace files to use (without the full path). Should be formatted as an array.
-  trace-directory:      # Path to the directory with the IBM traces
+    - prod-dal09-logstash-2017.07.21-2.json 
+  trace-directory: /Users/erwin/projects/creb/traces/      # Path to the directory with the IBM traces
   clients-number: 3     # Number of TR clients
   client-threads: 100   # Number of threads per client
   wait: true            # Specificy the execution mode: delay (true) and stress (false)
   warmup-threads: 10    # Number of threads that the master should use for prewarming
   master-port: 8086     # Port for the TR master.
-  results-directory:    # Path to the directory where the results should be stored.
-  limit-type:           # Type of limit of sample (requests or seconds)
-  limit-amount:         # Amount of the limit type (number of requests or number of seconds) from the sample.
+  results-directory: /Users/erwin/projects/creb/results/   # Path to the directory where the results should be stored.
+  limit-type: requests           # Type of limit of sample (requests or seconds)
+  limit-amount: 405         # Amount of the limit type (number of requests or number of seconds) from the sample.
   

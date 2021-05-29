@@ -9,9 +9,10 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"strings"
+
 	"registry_benchmark/auth"
 	"registry_benchmark/config"
-	"strings"
 
 	"gopkg.in/yaml.v2"
 )
@@ -48,11 +49,18 @@ var homeDir string
 var registryConfig *config.Config
 
 func DeployTraceReplayerDas() {
-	Config, _ = loadConfig("das-config.yaml")
-	registryConfig, _ = config.LoadConfig(Config.TraceReplayerConfigPath)
+	var err error
+	Config, err = loadConfig("das-config.yaml")
+	if err != nil {
+		panic(err)
+	}
+	registryConfig, err = config.LoadConfig(Config.TraceReplayerConfigPath)
+	if err != nil {
+		panic(err)
+	}
 	usr, err := user.Current()
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	homeDir = fmt.Sprintf("%s/", usr.HomeDir)
 
@@ -64,7 +72,7 @@ func DeployTraceReplayerDas() {
 	files = append(files, traceReplayerFiles...)
 	output := "done.zip"
 	if err := zipFiles(output, files); err != nil {
-		log.Fatalln(err)
+		log.Fatalln("failed to zip:", err)
 	}
 	log.Println("Zipped File:", output)
 
@@ -99,7 +107,7 @@ func DeployTraceReplayerDas() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	session.Run("/usr/bin/unzip -o /home/user/done.zip")
+	session.Run("/usr/bin/unzip -o /home/evk810/done.zip")
 	session.Close()
 	client.Close()
 	jumpClient.Close()
@@ -159,11 +167,11 @@ func loadConfig(filename string) (*DeploymentConfig, error) {
 	c := DeploymentConfig{}
 	yamlFile, err := ioutil.ReadFile(filename)
 	if err != nil {
-		log.Printf("yamlFile.Get err   #%v ", err)
+		return nil, fmt.Errorf("yamlFile.Get err: %v", err)
 	}
 	err = yaml.Unmarshal(yamlFile, &c)
 	if err != nil {
-		log.Fatalf("Unmarshal: %v", err)
+		return nil, fmt.Errorf("unmarshal: %v", err)
 	}
 	return &c, nil
 }
@@ -172,7 +180,7 @@ func zipFiles(filename string, files []string) error {
 
 	newZipFile, err := os.Create(filename)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create: %w", err)
 	}
 	defer newZipFile.Close()
 
@@ -180,9 +188,13 @@ func zipFiles(filename string, files []string) error {
 	defer zipWriter.Close()
 
 	// Add files to zip
+	fmt.Printf("zipping files: %s\n", files)
 	for _, file := range files {
+		if file == "" {
+			continue
+		}
 		if err = addFileToZip(zipWriter, file); err != nil {
-			return err
+			return fmt.Errorf("failed to add file to zip: %w", err)
 		}
 	}
 	return nil
@@ -192,7 +204,7 @@ func addFileToZip(zipWriter *zip.Writer, filename string) error {
 
 	fileToZip, err := os.Open(filename)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to open file '%s' to add to zip: %w", filename, err)
 	}
 	defer fileToZip.Close()
 

@@ -1,16 +1,20 @@
 gcloud-key: 
 aws-credentials-path: 
-trace-replayer-path: 
-trace-path: 
-trace-replayer-config-path: 
+trace-replayer-path: /Users/erwin/projects/creb/docker-performance
+trace-path: /Users/erwin/projects/creb/traces
+trace-replayer-config-path: config.yaml 
 vunet-credentials:
-  ssh-connection: 
-  password: 
+  ssh-connection: ssh.data.vu.nl:22
+  username: evk810
+  password: Niwre102@vunl
 das-credentials:
-  das-connection: 
-  username: 
-  password: 
-client-script: 
-prefetch-script: 
-run-script: 
-das-client-nodes: []
+  das-connection: fs0.das5.cs.vu.nl:22
+  username: evk810
+  password: 5qD3rQja
+client-script: master-run.sh
+prefetch-script: master-prefetch.sh
+run-script: client.sh
+das-client-nodes:
+  - node063
+  - node064
+  - node065

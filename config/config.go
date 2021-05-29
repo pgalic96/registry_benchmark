@@ -1,8 +1,9 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
-	"log"
+
 	"registry_benchmark/imggen"
 
 	"gopkg.in/yaml.v3"
@@ -38,11 +39,11 @@ func LoadConfig(filename string) (*Config, error) {
 	c := Config{}
 	yamlFile, err := ioutil.ReadFile(filename)
 	if err != nil {
-		log.Printf("yamlFile.Get err   #%v ", err)
+		return nil, fmt.Errorf("yamlFile.Get err: %v", err)
 	}
 	err = yaml.Unmarshal(yamlFile, &c)
 	if err != nil {
-		log.Fatalf("Unmarshal: %v", err)
+		return nil, fmt.Errorf("unmarshal: %v", err)
 	}
 	return &c, nil
 }
