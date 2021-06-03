@@ -27,6 +27,10 @@ Example:
 creb push
 ```
 
+#### Notes for reviewers
+
+In order to run this command you need to have the following fields set in the `config.yaml` : at least one `registry`, `pull-source-folder`, `image-generation` block.
+
 ### manpull
 
 Command `manpull` will pull the manifest of the image. The image must have been pushed before running this command.
@@ -37,6 +41,10 @@ creb push
 creb manpull
 ```
 
+#### Notes for reviewers
+
+In order to run this command you need to have the following fields set in the `config.yaml` : at least one `registry`, `pull-source-folder`, `image-generation` block. You also need to make sure the manifest was already pushed to the registry (which is done by setting `upload-manifest` flag in the `registry` block).
+
 ### layerpull
 
 Command `layerpull` will pull the layers of an image. The image must have been pushed before running this command.
@@ -46,6 +54,10 @@ Example:
 creb push
 creb layerpull
 ```
+
+#### Notes for reviewers
+
+In order to run this command you need to have the following fields set in the `config.yaml` : at least one `registry`, `pull-source-folder`, `image-generation` block. You also need to make sure the layers were already pushed to the registry (via push command).
 
 ### trace-replayer
 
@@ -59,3 +71,8 @@ Example:
 ```bash
 creb trace-replayer -d local
 ```
+
+#### Notes for reviewers
+
+In order to run the trace replayer locally you need to have the following configuration set:
+In `config.yaml`: `trace-replayer` block, at least one `registry`.
