@@ -57,5 +57,5 @@ Command `trace-replayer` will configure and run the trace-replayer tool. To run 
 
 Example:
 ```bash
-creb trace-replayer
+creb trace-replayer -d local
 ```
