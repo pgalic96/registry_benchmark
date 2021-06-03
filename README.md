@@ -6,7 +6,7 @@ CReB is an extensible toolkit to run benchmarks against any container image regi
 
 Prerequisites:
 - `go` (> 1.12)
-- `python2`
+- `python2.7`
 
 1. Clone this repository and update your working directory.
 2. Clone the CReB Trace Replayer repository somewhere on your system: `git clone git@github.com:pgalic96/docker-performance.git`
